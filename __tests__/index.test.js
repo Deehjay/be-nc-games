@@ -68,3 +68,40 @@ describe("/api/reviews", () => {
       });
   });
 });
+
+describe("/api/reviews/:review_id", () => {
+  test("GET - 200: Responds with an an object corresponding to the queried review_id", () => {
+    return request(app)
+      .get("/api/reviews/1")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.selectedReview).toMatchObject({
+          review_id: expect.any(Number),
+          title: expect.any(String),
+          review_body: expect.any(String),
+          designer: expect.any(String),
+          review_img_url: expect.any(String),
+          votes: expect.any(Number),
+          category: expect.any(String),
+          owner: expect.any(String),
+          created_at: expect.any(String),
+        });
+      });
+  });
+  test("GET - 400: Responds with 400 bad request when queried an invalid id", () => {
+    return request(app)
+      .get("/api/reviews/notanid")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
+      });
+  });
+  test("GET - 404: Responds with 404 not found when queried a valid but non-existent ID", () => {
+    return request(app)
+      .get("/api/reviews/7777777")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("ID does not exist");
+      });
+  });
+});
