@@ -12,3 +12,20 @@ exports.selectReviews = () => {
       return response.rows;
     });
 };
+
+exports.selectReviewById = (review_id) => {
+  return db
+    .query(
+      `
+      SELECT * FROM reviews
+      WHERE review_id = $1`,
+      [review_id]
+    )
+    .then((response) => {
+      const review = response.rows[0];
+      if (!review) {
+        return Promise.reject({ status: 404, msg: "ID does not exist" });
+      }
+      return review;
+    });
+};
