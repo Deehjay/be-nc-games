@@ -7,6 +7,17 @@ const data = require("../db/data/test-data/index");
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
+describe("/*", () => {
+  test("GET - 404: Responds with 404 not found error when passed a bad path", () => {
+    return request(app)
+      .get("/api/something_bad")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Route does not exist");
+      });
+  });
+});
+
 describe("/api/categories", () => {
   test("GET - 200: Responds with array of all categories", () => {
     return request(app)
@@ -20,14 +31,6 @@ describe("/api/categories", () => {
             description: expect.any(String),
           });
         });
-      });
-  });
-  test("GET - 404: Responds with 404 not found error when passed a bad path", () => {
-    return request(app)
-      .get("/api/something_bad")
-      .expect(404)
-      .then((response) => {
-        expect(response.body.msg).toBe("Route does not exist");
       });
   });
 });
