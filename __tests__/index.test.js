@@ -34,3 +34,37 @@ describe("/api/categories", () => {
       });
   });
 });
+
+describe("/api/reviews", () => {
+  test("GET - 200: Responds with an array of review objects", () => {
+    return request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews.length).toBe(13);
+        response.body.reviews.forEach((review) => {
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: expect.any(String),
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(String),
+          });
+        });
+      });
+  });
+  test("GET - 200: Should sort by date in descending order as default", () => {
+    return request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+});

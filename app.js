@@ -1,8 +1,13 @@
 const express = require("express");
-const { getCategories } = require("./controllers/categories.controllers");
+const {
+  getCategories,
+  getReviews,
+} = require("./controllers/categories.controllers");
 const app = express();
 
 app.get("/api/categories", getCategories);
+
+app.get("/api/reviews", getReviews);
 
 //error handling for all bad paths
 app.all("/*", (req, res) => {
