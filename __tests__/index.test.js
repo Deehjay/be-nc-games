@@ -165,6 +165,26 @@ describe("/api/reviews/:review_id/comments", () => {
         });
       });
   });
+  test("POST - 201: Successfully posted comment ignores any unnecessary properties on the body", () => {
+    const newComment = {
+      username: "mallionaire",
+      body: "this is a comment",
+      extrafield: "something random..",
+    };
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send(newComment)
+      .expect(201)
+      .then((response) => {
+        expect(response.body.comment).toMatchObject({
+          review_id: 1,
+          body: "this is a comment",
+          author: "mallionaire",
+          votes: 0,
+          created_at: expect.any(String),
+        });
+      });
+  });
   test("POST - 400: Responds with 400 error when body is missing required fields", () => {
     const newComment = {};
     return request(app)
@@ -172,7 +192,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .send(newComment)
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Body missing required fields");
+        expect(response.body.msg).toBe("Invalid request");
       });
   });
   test("POST - 400: Responds with 400 error when body properties fail schema validation", () => {
@@ -182,7 +202,17 @@ describe("/api/reviews/:review_id/comments", () => {
       .send(newComment)
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Body failing schema validation");
+        expect(response.body.msg).toBe("Invalid request");
+      });
+  });
+  test("POST - 400: Responds with 400 error when queried an invalid review id", () => {
+    const newComment = { username: "mallionaire", body: "this is a comment" };
+    return request(app)
+      .post("/api/reviews/notanid/comments")
+      .send(newComment)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
       });
   });
   test("POST - 404: Responds with 404 error when trying to post using a username that is valid but does not exist", () => {
@@ -193,6 +223,16 @@ describe("/api/reviews/:review_id/comments", () => {
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("User does not exist");
+      });
+  });
+  test("POST - 404: Responds with 404 error when trying to post to a valid but non-existent ID", () => {
+    const newComment = { username: "testusername", body: "This is a comment" };
+    return request(app)
+      .post("/api/reviews/1000/comments")
+      .send(newComment)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Review not found");
       });
   });
 });
