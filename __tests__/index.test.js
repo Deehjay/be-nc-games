@@ -75,7 +75,6 @@ describe("/api/reviews/:review_id", () => {
       .get("/api/reviews/1")
       .expect(200)
       .then((response) => {
-        console.log(response.body.review);
         expect(response.body.review).toMatchObject({
           review_id: 1,
           title: "Agricola",
@@ -104,6 +103,50 @@ describe("/api/reviews/:review_id", () => {
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("ID does not exist");
+      });
+  });
+});
+
+describe("/api/reviews/:review_id/comments", () => {
+  test("GET - 200: Responds with an array of comments for the specified review_id", () => {
+    return request(app)
+      .get("/api/reviews/3/comments")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toHaveLength(3);
+        response.body.comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            body: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            review_id: 3,
+            created_at: expect.any(String),
+          });
+        });
+      });
+  });
+  test("GET - 200: Responds with an empty array when queried review_id has no associated comments", () => {
+    return request(app)
+      .get("/api/reviews/4/comments")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.comments).toEqual([]);
+      });
+  });
+  test("GET - 404: Responds with 404 error when specified review_id is valid but does not exist", () => {
+    return request(app)
+      .get("/api/reviews/1000/comments")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Review not found");
+      });
+  });
+  test("GET - 400: Responds with 400 error when passed a bad path", () => {
+    return request(app)
+      .get("/api/reviews/somethingbad/comments")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
       });
   });
 });
