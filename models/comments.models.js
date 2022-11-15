@@ -24,14 +24,14 @@ exports.insertCommentByReviewId = (review_id, comment) => {
   if (!username || !body) {
     return Promise.reject({
       status: 400,
-      msg: "Body missing required fields",
+      msg: "Invalid request",
     });
   }
 
   if (typeof username !== "string" || typeof body !== "string") {
     return Promise.reject({
       status: 400,
-      msg: "Body failing schema validation",
+      msg: "Invalid request",
     });
   }
 
