@@ -68,3 +68,42 @@ describe("/api/reviews", () => {
       });
   });
 });
+
+describe("/api/reviews/:review_id", () => {
+  test("GET - 200: Responds with an an object corresponding to the queried review_id", () => {
+    return request(app)
+      .get("/api/reviews/1")
+      .expect(200)
+      .then((response) => {
+        console.log(response.body.review);
+        expect(response.body.review).toMatchObject({
+          review_id: 1,
+          title: "Agricola",
+          review_body: "Farmyard fun!",
+          designer: "Uwe Rosenberg",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          votes: 1,
+          category: "euro game",
+          owner: "mallionaire",
+          created_at: "2021-01-18T10:00:20.514Z",
+        });
+      });
+  });
+  test("GET - 400: Responds with 400 bad request when queried an invalid id", () => {
+    return request(app)
+      .get("/api/reviews/notanid")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
+      });
+  });
+  test("GET - 404: Responds with 404 not found when queried a valid but non-existent ID", () => {
+    return request(app)
+      .get("/api/reviews/7777777")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("ID does not exist");
+      });
+  });
+});
