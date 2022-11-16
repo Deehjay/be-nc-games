@@ -3,6 +3,7 @@ const request = require("supertest");
 const db = require("../db/connection.js");
 const seed = require("../db/seeds/seed.js");
 const data = require("../db/data/test-data/index");
+const { response } = require("../app.js");
 
 beforeEach(() => seed(data));
 afterAll(() => db.end());
@@ -103,6 +104,122 @@ describe("/api/reviews/:review_id", () => {
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("ID does not exist");
+      });
+  });
+  test("PATCH - 200: Responds with updated review when given a positive inc_votes value", () => {
+    const updatedReview = { inc_votes: 100 };
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.review).toMatchObject({
+          review_id: 1,
+          title: "Agricola",
+          review_body: "Farmyard fun!",
+          designer: "Uwe Rosenberg",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          votes: 101,
+          category: "euro game",
+          owner: "mallionaire",
+          created_at: "2021-01-18T10:00:20.514Z",
+        });
+      });
+  });
+  test("PATCH - 200: Responds with correctly updated review when given a negative inc_votes value", () => {
+    const updatedReview = { inc_votes: -2 };
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.review).toMatchObject({
+          review_id: 1,
+          title: "Agricola",
+          review_body: "Farmyard fun!",
+          designer: "Uwe Rosenberg",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          votes: -1,
+          category: "euro game",
+          owner: "mallionaire",
+          created_at: "2021-01-18T10:00:20.514Z",
+        });
+      });
+  });
+  test("PATCH - 400: Throws a 400 error when body is missing required fields", () => {
+    const updatedReview = {};
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid request");
+      });
+  });
+  test("PATCH - 400: Throws a 400 error when passed correct field but invalid type", () => {
+    const updatedReview = { inc_votes: "definitelynotanumber" };
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid request");
+      });
+  });
+  test("PATCH - 400: Throws a 400 error when passed misspelled inc_votes", () => {
+    const updatedReview = { inc_votesahhh: 100 };
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid request");
+      });
+  });
+  test("PATCH - 200: Ignores any extra keys provided on the body", () => {
+    const updatedReview = {
+      inc_votes: 100,
+      asurprise: "Please don't ignore me!",
+    };
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(200)
+      .then((response) => {
+        expect(response.body.review).toMatchObject({
+          review_id: 1,
+          title: "Agricola",
+          review_body: "Farmyard fun!",
+          designer: "Uwe Rosenberg",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          votes: 101,
+          category: "euro game",
+          owner: "mallionaire",
+          created_at: "2021-01-18T10:00:20.514Z",
+        });
+      });
+  });
+  test("PATCH - 400: Throws a 400 error when queried an invalid review ID", () => {
+    const updatedReview = { inc_votes: 100 };
+    return request(app)
+      .patch("/api/reviews/somethingbad")
+      .send(updatedReview)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
+      });
+  });
+  test("PATCH - 404: Throws a 404 error when queried a valid but non-existent ID", () => {
+    const updatedReview = { inc_votes: 100 };
+    return request(app)
+      .patch("/api/reviews/1000")
+      .send(updatedReview)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Review not found");
       });
   });
 });
