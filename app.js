@@ -9,9 +9,12 @@ const {
   getReviewById,
   patchReviewById,
 } = require("./controllers/reviews.controllers");
+const { getUsers } = require("./controllers/users.controllers");
 const app = express();
 
 app.use(express.json());
+
+app.get("/api/users", getUsers);
 
 app.get("/api/categories", getCategories);
 
