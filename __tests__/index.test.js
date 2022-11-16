@@ -168,6 +168,16 @@ describe("/api/reviews/:review_id", () => {
         expect(response.body.msg).toBe("Invalid request");
       });
   });
+  test("PATCH - 400: Throws a 400 error when passed misspelled inc_votes", () => {
+    const updatedReview = { inc_votesahhh: 100 };
+    return request(app)
+      .patch("/api/reviews/1")
+      .send(updatedReview)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid request");
+      });
+  });
   test("PATCH - 200: Ignores any extra keys provided on the body", () => {
     const updatedReview = {
       inc_votes: 100,
