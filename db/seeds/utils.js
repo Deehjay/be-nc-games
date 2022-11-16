@@ -1,5 +1,21 @@
 const db = require("../connection.js");
 
+exports.checkUserExists = (username) => {
+  return db
+    .query(
+      `
+    SELECT * from users
+    WHERE username = $1
+    `,
+      [username]
+    )
+    .then((res) => {
+      if (!res.rows.length) {
+        return Promise.reject({ status: 404, msg: "User does not exist" });
+      }
+    });
+};
+
 exports.checkReviewExists = (review_id) => {
   return db
     .query(
