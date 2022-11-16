@@ -1,4 +1,5 @@
 const db = require("../db/connection.js");
+const { checkReviewExists } = require("../db/seeds/utils.js");
 
 exports.selectReviews = () => {
   return db
@@ -30,5 +31,33 @@ exports.selectReviewById = (review_id) => {
         return Promise.reject({ status: 404, msg: "ID does not exist" });
       }
       return review;
+    });
+};
+
+exports.updateReviewById = (review_id, updateInfo) => {
+  const { inc_votes } = updateInfo;
+
+  if (!inc_votes) {
+    return Promise.reject({ status: 400, msg: "Invalid request" });
+  }
+
+  if (typeof inc_votes !== "number") {
+    return Promise.reject({ status: 400, msg: "Invalid request" });
+  }
+
+  return checkReviewExists(review_id)
+    .then(() => {
+      return db.query(
+        `
+      UPDATE reviews
+      SET votes = votes + $1
+      WHERE review_id = $2
+      RETURNING *;
+      `,
+        [inc_votes, review_id]
+      );
+    })
+    .then((res) => {
+      return res.rows[0];
     });
 };
