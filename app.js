@@ -7,6 +7,7 @@ const {
 const {
   getReviews,
   getReviewById,
+  patchReviewById,
 } = require("./controllers/reviews.controllers");
 const app = express();
 
@@ -21,6 +22,8 @@ app.get("/api/reviews/:review_id", getReviewById);
 app.get("/api/reviews/:review_id/comments", getCommentsByReviewId);
 
 app.post("/api/reviews/:review_id/comments", postCommentByReviewId);
+
+app.patch("/api/reviews/:review_id", patchReviewById);
 
 //error handling for all bad paths
 app.all("/*", (req, res) => {
