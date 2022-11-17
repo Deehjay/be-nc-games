@@ -1,5 +1,5 @@
 const db = require("../db/connection.js");
-const { checkReviewExists } = require("../db/seeds/utils.js");
+const { checkReviewExists, checkIfExists } = require("../db/seeds/utils.js");
 
 exports.selectReviews = (category, sort_by = "created_at", order = "desc") => {
   const validColumns = [
@@ -14,8 +14,6 @@ exports.selectReviews = (category, sort_by = "created_at", order = "desc") => {
     "created_at",
     "comment_count",
   ];
-
-  const validCategories = ["euro game", "dexterity", "social deduction"];
 
   let queryValues = [];
 
@@ -34,17 +32,18 @@ exports.selectReviews = (category, sort_by = "created_at", order = "desc") => {
    `;
 
   if (category) {
-    if (!validCategories.includes(category)) {
-      return Promise.reject({ status: 400, msg: "Invalid category query" });
-    } else {
-      queryValues.push(category);
-      queryStr += ` WHERE category = $1`;
-    }
+    queryValues.push(category);
+    queryStr += ` WHERE category = $1`;
   }
 
   queryStr += ` GROUP BY reviews.review_id ORDER BY ${sort_by} ${order};`;
 
   return db.query(queryStr, queryValues).then((response) => {
+    if (!response.rows.length) {
+      return checkIfExists("categories", "slug", category).then(() => {
+        return [];
+      });
+    }
     return response.rows;
   });
 };
