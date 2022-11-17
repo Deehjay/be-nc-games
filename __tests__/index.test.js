@@ -53,7 +53,7 @@ describe("/api/reviews", () => {
             created_at: expect.any(String),
             votes: expect.any(Number),
             designer: expect.any(String),
-            comment_count: expect.any(String),
+            comment_count: expect.any(Number),
           });
         });
       });
@@ -66,6 +66,144 @@ describe("/api/reviews", () => {
         expect(response.body.reviews).toBeSortedBy("created_at", {
           descending: true,
         });
+      });
+  });
+  test("GET - 200: Selects only reviews with the specified category when queried", () => {
+    return request(app)
+      .get("/api/reviews?category=dexterity")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews.length).toBe(1);
+        expect(response.body.reviews[0]).toMatchObject({
+          title: "Jenga",
+          designer: "Leslie Scott",
+          owner: "philippaclaire9",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          category: "dexterity",
+          created_at: expect.any(String),
+          votes: 5,
+          comment_count: 3,
+        });
+      });
+  });
+  test("GET - 200: Works when queried a category with a space", () => {
+    return request(app)
+      .get("/api/reviews?category=social%20deduction")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews.length).toBe(11);
+        response.body.reviews.forEach((review) => {
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: "social deduction",
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("GET - 200: Response is sorted by specified sort_by", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=comment_count")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews.length).toBe(13);
+        expect(response.body.reviews).toBeSortedBy("comment_count", {
+          descending: true,
+        });
+      });
+  });
+  test("GET - 200: Response is sorted and ordered by specified sort_by and order", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=comment_count&order=asc")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews.length).toBe(13);
+        expect(response.body.reviews).toBeSortedBy("comment_count", {
+          ascending: true,
+        });
+      });
+  });
+  test("GET 200: Works when queried all 3 valid queries", () => {
+    return request(app)
+      .get(
+        "/api/reviews?category=social%20deduction&sort_by=comment_count&order=asc"
+      )
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews.length).toBe(11);
+        response.body.reviews.forEach((review) => {
+          expect(review).toMatchObject({
+            owner: expect.any(String),
+            title: expect.any(String),
+            review_id: expect.any(Number),
+            category: "social deduction",
+            review_img_url: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            designer: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+        expect(response.body.reviews).toBeSortedBy("comment_count", {
+          ascending: true,
+        });
+      });
+  });
+  test("GET - 200: Responds with an empty array when passed a valid category which has no associated reviews", () => {
+    return request(app)
+      .get("/api/reviews?category=children%27s%20games")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toEqual([]);
+      });
+  });
+  test("GET - 400: Responds with 400 error when queried an invalid sort_by", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=something_bad")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid sort query");
+      });
+  });
+  test("GET - 400: Responds with 400 error when queried an invalid order", () => {
+    return request(app)
+      .get("/api/reviews?order=something_bad")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid order query");
+      });
+  });
+  test("GET - 400: Responds with 400 error when either sort_by or order are invalid", () => {
+    return request(app)
+      .get("/api/reviews?order=asc&sort_by=something_bad")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid sort query");
+      });
+  });
+  test("GET - 404: Responds with 404 error when queried category does not exist", () => {
+    return request(app)
+      .get("/api/reviews?category=something_bad")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("not found");
+      });
+  });
+  test("GET - 400: Responds with 400 error when any of the 3 queries are invalid", () => {
+    return request(app)
+      .get(
+        "/api/reviews?category=social%20deduction&order=somethingbad&sort_by=title"
+      )
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid order query");
       });
   });
 });
