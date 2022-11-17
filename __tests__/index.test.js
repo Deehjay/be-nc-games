@@ -412,6 +412,7 @@ describe("/api/reviews/:review_id/comments", () => {
       .send(newComment)
       .expect(201)
       .then((response) => {
+        console.log(response.body.comment);
         expect(response.body.comment).toMatchObject({
           review_id: 1,
           body: "this is a comment",
@@ -529,6 +530,18 @@ describe("/api/comments/:comment_id", () => {
       .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("not found");
+      });
+  });
+});
+
+describe("/api", () => {
+  test("GET - 200: Responds with a JSON of all available endpoints on the api", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then((response) => {
+        const endpoints = require("../endpoints.json");
+        expect(response.body.endpoints).toEqual(endpoints);
       });
   });
 });
