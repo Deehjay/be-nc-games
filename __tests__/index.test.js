@@ -532,3 +532,15 @@ describe("/api/comments/:comment_id", () => {
       });
   });
 });
+
+describe("/api", () => {
+  test("GET - 200: Responds with a JSON of all available endpoints on the api", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then((response) => {
+        const endpoints = require("../endpoints.json");
+        expect(response.body.endpoints).toEqual(endpoints);
+      });
+  });
+});
