@@ -412,7 +412,6 @@ describe("/api/reviews/:review_id/comments", () => {
       .send(newComment)
       .expect(201)
       .then((response) => {
-        console.log(response.body.comment);
         expect(response.body.comment).toMatchObject({
           review_id: 1,
           body: "this is a comment",
