@@ -1,4 +1,20 @@
 const db = require("../connection.js");
+const format = require("pg-format");
+
+exports.checkIfExists = (table, column, value) => {
+  const queryStr = format(
+    `SELECT * FROM %I WHERE %I = %L`,
+    table,
+    column,
+    value
+  );
+
+  return db.query(queryStr).then((res) => {
+    if (!res.rows.length) {
+      return Promise.reject({ status: 404, msg: `not found` });
+    }
+  });
+};
 
 exports.checkUserExists = (username) => {
   return db
