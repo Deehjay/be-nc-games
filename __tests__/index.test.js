@@ -513,12 +513,7 @@ describe("/api/users", () => {
 
 describe("/api/comments/:comment_id", () => {
   test("DELETE - 204: Successfully deletes the queried comment", () => {
-    return request(app)
-      .delete("/api/comments/1")
-      .expect(204)
-      .then((response) => {
-        expect(response.body).toEqual({});
-      });
+    return request(app).delete("/api/comments/1").expect(204);
   });
   test("DELETE - 400: Returns 400 error when passed a bad path", () => {
     return request(app)
