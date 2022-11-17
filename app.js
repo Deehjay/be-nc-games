@@ -3,6 +3,7 @@ const { getCategories } = require("./controllers/categories.controllers");
 const {
   getCommentsByReviewId,
   postCommentByReviewId,
+  deleteCommentById,
 } = require("./controllers/comments.controllers");
 const {
   getReviews,
@@ -27,6 +28,8 @@ app.get("/api/reviews/:review_id/comments", getCommentsByReviewId);
 app.post("/api/reviews/:review_id/comments", postCommentByReviewId);
 
 app.patch("/api/reviews/:review_id", patchReviewById);
+
+app.delete("/api/comments/:comment_id", deleteCommentById);
 
 //error handling for all bad paths
 app.all("/*", (req, res) => {
