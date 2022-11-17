@@ -16,6 +16,10 @@ const app = express();
 
 app.use(express.json());
 
+app.get("/api/health", (req, res) => {
+  res.status(200).send({ msg: "Server up and running!" });
+});
+
 app.get("/api", getApi);
 
 app.get("/api/users", getUsers);
