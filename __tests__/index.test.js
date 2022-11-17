@@ -510,3 +510,30 @@ describe("/api/users", () => {
       });
   });
 });
+
+describe("/api/comments/:comment_id", () => {
+  test("DELETE - 204: Successfully deletes the queried comment", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then((response) => {
+        expect(response.body).toEqual({});
+      });
+  });
+  test("DELETE - 400: Returns 400 error when passed a bad path", () => {
+    return request(app)
+      .delete("/api/comments/notanid")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
+      });
+  });
+  test("DELETE - 404: Returns a 404 error when passed a valid but non existent ID", () => {
+    return request(app)
+      .delete("/api/comments/1000")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("not found");
+      });
+  });
+});
