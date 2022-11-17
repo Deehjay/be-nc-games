@@ -156,6 +156,14 @@ describe("/api/reviews", () => {
         });
       });
   });
+  test("GET - 200: Responds with an empty array when passed a valid category which has no associated reviews", () => {
+    return request(app)
+      .get("/api/reviews?category=children%27s%20games")
+      .expect(200)
+      .then((response) => {
+        expect(response.body.reviews).toEqual([]);
+      });
+  });
   test("GET - 400: Responds with 400 error when queried an invalid sort_by", () => {
     return request(app)
       .get("/api/reviews?sort_by=something_bad")
@@ -180,20 +188,22 @@ describe("/api/reviews", () => {
         expect(response.body.msg).toBe("Invalid sort query");
       });
   });
-  test("GET - 400: Responds with 400 error when category query is invalid", () => {
+  test("GET - 404: Responds with 404 error when queried category does not exist", () => {
     return request(app)
       .get("/api/reviews?category=something_bad")
-      .expect(400)
+      .expect(404)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid category query");
+        expect(response.body.msg).toBe("not found");
       });
   });
   test("GET - 400: Responds with 400 error when any of the 3 queries are invalid", () => {
     return request(app)
-      .get("/api/reviews?category=something_bad&order=asc&sort_by=title")
+      .get(
+        "/api/reviews?category=social%20deduction&order=somethingbad&sort_by=title"
+      )
       .expect(400)
       .then((response) => {
-        expect(response.body.msg).toBe("Invalid category query");
+        expect(response.body.msg).toBe("Invalid order query");
       });
   });
 });
