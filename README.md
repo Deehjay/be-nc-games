@@ -83,10 +83,10 @@ afterAll(() => db.end());
 
 ## Testing
 
-This project makes use of the npm package `SuperTest` in collaboration with our chosen testing suite, Jest. In order for the tests to run correctly, you'll need to install SuperTest as a dev dependency:
+This project makes use of the npm package `SuperTest` in collaboration with our chosen testing suite, Jest. To run the tests:
 
 ```
-npm install -D supertest
+npm t index.test.js
 ```
 
 For creating further tests, take a look at the SuperTest [documentation](https://npmjs.com/package/supertest)
