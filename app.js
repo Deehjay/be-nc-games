@@ -1,65 +1,39 @@
 const express = require("express");
-const { getApi } = require("./controllers/api.controllers");
-const { getCategories } = require("./controllers/categories.controllers");
-const {
-  getCommentsByReviewId,
-  postCommentByReviewId,
-  deleteCommentById,
-} = require("./controllers/comments.controllers");
-const {
-  getReviews,
-  getReviewById,
-  patchReviewById,
-} = require("./controllers/reviews.controllers");
-const { getUsers } = require("./controllers/users.controllers");
 const app = express();
+const apiRouter = require("./routes/api-router");
+const usersRouter = require("./routes/users-router");
+const categoriesRouter = require("./routes/categories-router");
+const reviewsRouter = require("./routes/reviews-router");
+const commentsRouter = require("./routes/comments-router");
+const {
+  handleCustomErrors,
+  handleDefaultErrors,
+  handlePsqlErrors,
+} = require("./errors");
 
 app.use(express.json());
 
-app.get("/api/health", (req, res) => {
-  res.status(200).send({ msg: "Server up and running!" });
-});
+app.use("/", apiRouter);
 
-app.get("/api", getApi);
+app.use("/api/users", usersRouter);
 
-app.get("/api/users", getUsers);
+app.use("/api/categories", categoriesRouter);
 
-app.get("/api/categories", getCategories);
+app.use("/api/reviews", reviewsRouter);
 
-app.get("/api/reviews", getReviews);
+app.use("/api/comments", commentsRouter);
 
-app.get("/api/reviews/:review_id", getReviewById);
+// Error Handling
 
-app.get("/api/reviews/:review_id/comments", getCommentsByReviewId);
-
-app.post("/api/reviews/:review_id/comments", postCommentByReviewId);
-
-app.patch("/api/reviews/:review_id", patchReviewById);
-
-app.delete("/api/comments/:comment_id", deleteCommentById);
-
-//error handling for all bad paths
+// All bad paths
 app.all("/*", (req, res) => {
   res.status(404).send({ msg: "Route does not exist" });
 });
-
-//custom error handling
-app.use((err, req, res, next) => {
-  if (err.status && err.msg) {
-    res.status(err.status).send({ msg: err.msg });
-  } else next(err);
-});
-
-//error handling for psql errors
-app.use((err, req, res, next) => {
-  if (err.code === "22P02") {
-    res.status(400).send({ msg: "Invalid ID" });
-  } else next(err);
-});
-
-//default error handling
-app.use((err, req, res, next) => {
-  res.status(500).send("Server Error");
-});
+// Custom Errors
+app.use(handleCustomErrors);
+// PSQL Errors
+app.use(handlePsqlErrors);
+// Default Errors
+app.use(handleDefaultErrors);
 
 module.exports = app;
