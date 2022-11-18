@@ -555,3 +555,35 @@ describe("/api/health", () => {
       });
   });
 });
+
+describe("/api/users/:username", () => {
+  test("GET - 200: Responds with an object corresponding to the provided username", () => {
+    return request(app)
+      .get("/api/users/mallionaire")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.user).toEqual({
+          username: "mallionaire",
+          name: "haz",
+          avatar_url:
+            "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg",
+        });
+      });
+  });
+  test("GET - 400: Responds with 400 error when passed an invalid username", () => {
+    return request(app)
+      .get("/api/users/123")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid username");
+      });
+  });
+  test("GET - 404: Responds with 404 error when passed a valid but non existent id", () => {
+    return request(app)
+      .get("/api/users/a")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
+      });
+  });
+});
