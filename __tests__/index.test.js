@@ -206,6 +206,111 @@ describe("/api/reviews", () => {
         expect(response.body.msg).toBe("Invalid order query");
       });
   });
+  test("POST - 201: Responds with newly posted review", () => {
+    const review = {
+      owner: "mallionaire",
+      title: "monopoly sucks",
+      review_body: "monopoly is highly overrated",
+      designer: "Lizzie Maggie",
+      category: "social deduction",
+    };
+    return request(app)
+      .post("/api/reviews")
+      .send(review)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.review).toMatchObject({
+          owner: "mallionaire",
+          review_body: "monopoly is highly overrated",
+          title: "monopoly sucks",
+          review_id: 14,
+          category: "social deduction",
+          review_img_url:
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+          created_at: expect.any(String),
+          votes: 0,
+          designer: "Lizzie Maggie",
+          comment_count: 0,
+        });
+      });
+  });
+  test("POST - 201: Any extra keys are ignored", () => {
+    const review = {
+      owner: "mallionaire",
+      title: "monopoly sucks",
+      review_body: "monopoly is highly overrated",
+      designer: "Lizzie Maggie",
+      category: "social deduction",
+      sneaky: 1,
+    };
+    return request(app)
+      .post("/api/reviews")
+      .send(review)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.review).toMatchObject({
+          owner: "mallionaire",
+          review_body: "monopoly is highly overrated",
+          title: "monopoly sucks",
+          review_id: 14,
+          category: "social deduction",
+          review_img_url:
+            "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+          created_at: expect.any(String),
+          votes: 0,
+          designer: "Lizzie Maggie",
+          comment_count: 0,
+        });
+      });
+  });
+  test("POST - 400: Throws a 400 error if any of the required keys are not present", () => {
+    const review = {
+      owner: "mallionaire",
+      // title: "monopoly sucks",
+      review_body: "monopoly is highly overrated",
+      designer: "Lizzie Maggie",
+      category: "social deduction",
+    };
+    return request(app)
+      .post("/api/reviews")
+      .send(review)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid request");
+      });
+  });
+  test("POST - 404: Throws a 404 error if all keys are passed and are valid, but either the owner or category is not found", () => {
+    const review = {
+      owner: "sneakybeaky",
+      title: "monopoly sucks",
+      review_body: "monopoly is highly overrated",
+      designer: "Lizzie Maggie",
+      category: "social deduction",
+    };
+    return request(app)
+      .post("/api/reviews")
+      .send(review)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("not found");
+      });
+  });
+  test("POST - 400: Throws a 400 error if owner and category both exist, but one of the other fields is empty", () => {
+    const review = {
+      owner: "sneakybeaky",
+      title: "monopoly sucks",
+      review_body: "",
+      designer: "Lizzie Maggie",
+      category: "social deduction",
+    };
+    return request(app)
+      .post("/api/reviews")
+      .send(review)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("invalid request");
+      });
+  });
 });
 
 describe("/api/reviews/:review_id", () => {

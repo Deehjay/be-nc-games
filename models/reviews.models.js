@@ -95,3 +95,41 @@ exports.updateReviewById = (review_id, updateInfo) => {
       return res.rows[0];
     });
 };
+
+exports.insertReview = (review) => {
+  const { owner, title, review_body, designer, category } = review;
+
+  if (!owner || !title || !review_body || !designer || !category) {
+    return Promise.reject({ status: 400, msg: "invalid request" });
+  }
+  return checkIfExists("users", "username", owner)
+    .then(() => {
+      return checkIfExists("categories", "slug", category);
+    })
+    .then(() => {
+      return db.query(
+        `
+      INSERT INTO reviews
+      (owner, title, review_body, designer, category)
+      VALUES
+      ($1, $2, $3, $4, $5)
+      RETURNING *;
+      `,
+        [owner, title, review_body, designer, category]
+      );
+    })
+    .then((res) => {
+      return db.query(
+        `
+      SELECT reviews.owner, review_body, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, reviews.designer, COUNT(comments.review_id)::INT AS comment_count
+      FROM reviews 
+      LEFT JOIN comments ON reviews.review_id = comments.review_id
+      WHERE reviews.review_id = $1
+      GROUP BY reviews.review_id`,
+        [res.rows[0].review_id]
+      );
+    })
+    .then((res) => {
+      return res.rows[0];
+    });
+};
