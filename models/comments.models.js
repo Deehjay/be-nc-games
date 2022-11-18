@@ -69,3 +69,22 @@ exports.removeCommentById = (comment_id) => {
     );
   });
 };
+
+exports.patchCommentById = (comment_id, votes) => {
+  const { inc_votes } = votes;
+  return checkIfExists("comments", "comment_id", comment_id)
+    .then(() => {
+      return db.query(
+        `
+      UPDATE comments
+      SET votes = votes + $1
+      WHERE comment_id = $2
+      RETURNING *;
+      `,
+        [inc_votes, comment_id]
+      );
+    })
+    .then((res) => {
+      return res.rows[0];
+    });
+};
