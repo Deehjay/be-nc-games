@@ -466,6 +466,25 @@ describe("/api/reviews/:review_id", () => {
         expect(response.body.msg).toBe("Review not found");
       });
   });
+  test("DELETE - 204: Successfully deletes the queried article", () => {
+    return request(app).delete("/api/reviews/1").expect(204);
+  });
+  test("DELETE - 400: Returns 400 error when passed a bat path", () => {
+    return request(app)
+      .delete("/api/reviews/notanid")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid ID");
+      });
+  });
+  test("DELETE - 404: Returns a 404 error when passed a valid but non existent ID", () => {
+    return request(app)
+      .delete("/api/reviews/777777777")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("not found");
+      });
+  });
 });
 
 describe("/api/reviews/:review_id/comments", () => {

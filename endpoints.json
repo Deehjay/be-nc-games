@@ -136,6 +136,9 @@
       }
     }
   },
+  "DELETE /api/reviews/:review_id": {
+    "description": "deletes the specified review, providing no content"
+  },
   "DELETE /api/comments/:comment_id": {
     "description": "deletes the specified comment, providing no content"
   },
