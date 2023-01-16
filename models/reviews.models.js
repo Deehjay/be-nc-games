@@ -133,3 +133,13 @@ exports.insertReview = (review) => {
       return res.rows[0];
     });
 };
+
+exports.removeReviewById = (review_id) => {
+  return checkIfExists("reviews", "review_id", review_id).then(() => {
+    return db.query(
+      `DELETE FROM reviews
+       WHERE review_id = $1`,
+      [review_id]
+    );
+  });
+};
